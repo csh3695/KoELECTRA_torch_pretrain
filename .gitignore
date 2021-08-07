@@ -1,0 +1,11 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.idea
+.DS_Store
+base*
+main.py
+/query
+/pretrain
+/finetune
+/docs
+/data
