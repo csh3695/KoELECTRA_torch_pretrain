@@ -158,7 +158,7 @@ class PretrainingModel(nn.Module):
 
         sampled_token_ids = sample_from_softmax(
             mlm_logits / self.config.temperature
-        )  # tokens to be replaced with
+        ).detach()  # tokens to be replaced with
         updated_input_ids = inputs.input_ids.clone()
         updated_input_ids[
             inputs.masked_lm_positions
