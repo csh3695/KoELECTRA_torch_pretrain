@@ -106,7 +106,7 @@ class PretrainingModel(nn.Module):
             .float()
             .mean()
         ).item()
-        metrics["disc_precision"] = (
+        metrics["disc_recall"] = (
             (d["disc_labels"] == d["disc_preds"])[d["input_mask"] & d["disc_labels"]]
             .float()
             .mean()
