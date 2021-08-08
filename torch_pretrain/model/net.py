@@ -111,6 +111,24 @@ class PretrainingModel(nn.Module):
             .float()
             .mean()
         ).item()
+        metrics["disc_f1"] = 2 / (
+            1 / metrics["disc_recall"] + 1 / metrics["disc_precision"]
+        )
+
+        """ Additional Data """
+        metrics["TP"] = (
+            (d["disc_labels"] * d["disc_preds"])[d["input_mask"]].sum().item()
+        )
+        metrics["TN"] = (
+            ((~d["disc_labels"]) * (~d["disc_preds"]))[d["input_mask"]].sum().item()
+        )
+        metrics["FP"] = (
+            ((~d["disc_labels"]) * d["disc_preds"])[d["input_mask"]].sum().item()
+        )
+        metrics["FN"] = (
+            (d["disc_labels"] * (~d["disc_preds"]))[d["input_mask"]].sum().item()
+        )
+
         return metrics
 
     def _get_masked_lm_output(self, inputs: Inputs):
