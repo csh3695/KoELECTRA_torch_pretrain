@@ -8,5 +8,6 @@ main.py
 /pretrain
 /finetune
 /docs
+/base_docs
 /data
 /logs

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import torch
 import wandb
+import json
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -44,6 +45,8 @@ if __name__ == "__main__":
 
     runpath = Path("./experiment") / args.run_name
     runpath.mkdir(parents=True, exist_ok=True)
+    with open(runpath / "config.json", "w") as f:
+        json.dump(config.toDict(), f)
 
     wandb.init(project="KoElectraFinetune", config=config)
     wandb.run.name = args.run_name
