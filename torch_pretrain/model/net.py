@@ -21,6 +21,7 @@ class PretrainingModel(nn.Module):
         self.config = config
         self.generator = ElectraModel.from_pretrained(config.generator_path)
         self.discriminator = ElectraModel.from_pretrained(config.discriminator_path)
+        self._tie_weight()
         self.d_linear = nn.Sequential(
             nn.Linear(
                 self.discriminator.config.hidden_size,
@@ -39,6 +40,22 @@ class PretrainingModel(nn.Module):
         self.g_bias = nn.Parameter(
             torch.zeros(self.generator.config.vocab_size), requires_grad=True
         )
+
+    def _expand_embedding(self, size):
+        old_embedding = self.discriminator.get_input_embeddings()
+        old_embedding_weight = old_embedding.weight.data
+        n_embeddings, embedding_dim = old_embedding_weight.shape
+        if size <= n_embeddings:
+            print(f'Old n_embedding {n_embeddings} not less then {size}.')
+            return
+        new_embedding = nn.Embedding(num_embeddings=size, embedding_dim=embedding_dim, padding_idx=old_embedding.padding_idx)
+        new_embedding.weight.data[:n_embeddings] = old_embedding_weight
+        self.discriminator.set_input_embeddings(new_embedding)
+        self.generator.config.vocab_size = self.discriminator.config.vocab_size = size
+        self._tie_weight()
+
+    def _tie_weight(self):
+        self.generator.set_input_embeddings(self.discriminator.get_input_embeddings())
 
     def _get_masked_inputs(self, features):
         masked_inputs = mask(
@@ -111,8 +128,8 @@ class PretrainingModel(nn.Module):
             .float()
             .mean()
         ).item()
-        metrics["disc_f1"] = 2 / (
-            1 / metrics["disc_recall"] + 1 / metrics["disc_precision"]
+        metrics["disc_f1"] = 2 * metrics["disc_precision"] * metrics["disc_recall"] / max(
+            metrics["disc_recall"] + metrics["disc_precision"], 1e-12
         )
 
         """ Additional Data """
