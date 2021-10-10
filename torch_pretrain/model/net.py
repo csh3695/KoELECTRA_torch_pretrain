@@ -46,9 +46,13 @@ class PretrainingModel(nn.Module):
         old_embedding_weight = old_embedding.weight.data
         n_embeddings, embedding_dim = old_embedding_weight.shape
         if size <= n_embeddings:
-            print(f'Old n_embedding {n_embeddings} not less then {size}.')
+            print(f"Old n_embedding {n_embeddings} not less then {size}.")
             return
-        new_embedding = nn.Embedding(num_embeddings=size, embedding_dim=embedding_dim, padding_idx=old_embedding.padding_idx)
+        new_embedding = nn.Embedding(
+            num_embeddings=size,
+            embedding_dim=embedding_dim,
+            padding_idx=old_embedding.padding_idx,
+        )
         new_embedding.weight.data[:n_embeddings] = old_embedding_weight
         self.discriminator.set_input_embeddings(new_embedding)
         self.generator.config.vocab_size = self.discriminator.config.vocab_size = size
@@ -128,8 +132,11 @@ class PretrainingModel(nn.Module):
             .float()
             .mean()
         ).item()
-        metrics["disc_f1"] = 2 * metrics["disc_precision"] * metrics["disc_recall"] / max(
-            metrics["disc_recall"] + metrics["disc_precision"], 1e-12
+        metrics["disc_f1"] = (
+            2
+            * metrics["disc_precision"]
+            * metrics["disc_recall"]
+            / max(metrics["disc_recall"] + metrics["disc_precision"], 1e-12)
         )
 
         """ Additional Data """

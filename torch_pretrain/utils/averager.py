@@ -57,9 +57,8 @@ class WeightAverager(BaseAverager):
 
 
 class MultiAverager(object):
-    _averagers = dict()
-
     def __init__(self, averager):
+        self._averagers = dict()
         self.spawner = averager
 
     def __getattr__(self, item):
@@ -68,7 +67,8 @@ class MultiAverager(object):
         return self._averagers[item]
 
     def reset(self):
-        self._averagers = dict()
+        for k in set(self._averagers.keys()):
+            self._averagers.pop(k)
 
     def add(self, x: dict, weight=None):
         for k in x:
